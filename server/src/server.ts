@@ -1,21 +1,13 @@
 import express from 'express';
+import cors from 'cors';
+import routes from './routes';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
-app.get('/', (request, response) => {
+app.use(routes);
 
-
-    return response.json({welcomeTo: "Proffy server"})
-})
-
-app.get('/users', (request, response) => {
-    const users = [
-        {name: "Hugo"}
-    ]
-
-    return response	.json(users)
-})
 
 app.listen(3333);
