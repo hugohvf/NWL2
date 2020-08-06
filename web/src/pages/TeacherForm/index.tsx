@@ -1,15 +1,20 @@
 ﻿import React, { useState, FormEvent } from "react";
+import { useHistory } from 'react-router-dom';
 
 import PageHeader from "../../components/PageHeader";
 import Input from "../../components/Input";
 import Textarea from "../../components/TextArea";
 import Select from "../../components/Select";
 
+import api from "../../services/api";
+
 import warningIcon from "../../assets/images/icons/warning.svg";
 
 import "./styles.css";
 
 function TeacherForm() {
+  const history = useHistory();
+
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [avatar, setAvatar] = useState("");
@@ -19,8 +24,7 @@ function TeacherForm() {
   const [cost, setCost] = useState("");
 
   const [scheduleItems, setScheduleItems] = useState([
-    { week_day: 0, from: "8:00 AM", to: "4:00 PM" },
-    { week_day: 1, from: "10:00 AM", to: "6:00 PM" },
+    { week_day: 0, from: "", to: "" },
   ]);
 
   function addNewScheduleItem() {
@@ -34,15 +38,49 @@ function TeacherForm() {
     ]);
   }
 
-  function setScheduleItemValue(index: number, field: string, value: string) {
-      
+  function setScheduleItemValue(
+    position: number,
+    field: string,
+    value: string
+  ) {
+    const UpdatedScheduleItems = scheduleItems.map((scheduleItem, index) => {
+      if (index == position) {
+        return { ...scheduleItem, [field]: value };
+      }
+      return scheduleItem;
+    });
+
+    setScheduleItems(UpdatedScheduleItems);
   }
 
   function handleCreateClass(e: FormEvent) {
-      e.preventDefault();
-      {
-          avatar,bio, cost, name, subject,whatsapp
-      }
+    e.preventDefault();
+
+    api.post('classes', {
+      name,
+      avatar,
+      whatsapp,
+      bio,
+      subject,
+      cost: Number(cost),
+      schedule: scheduleItems
+    }).then(() => {
+      alert('Cadastro realizado com sucesso!');
+
+      history.push('/');
+    }).catch(() => {
+      alert('Erro no cadastro!');
+    })
+
+    console.log({
+      name,
+      avatar,
+      whatsapp,
+      bio,
+      subject,
+      cost: Number(cost),
+      schedule: scheduleItems
+    })
   }
 
   return (
@@ -67,7 +105,7 @@ function TeacherForm() {
             <Input
               name="avatar"
               label="Avatar"
-              value={bio}
+              value={avatar}
               onChange={(e) => {
                 setAvatar(e.target.value);
               }}
@@ -102,10 +140,15 @@ function TeacherForm() {
               }}
               options={[
                 { value: "Artes", label: "Artes" },
+                { value: "Biologia", label: "Biologia" },
                 { value: "Matemática", label: "Matemática" },
+                { value: "Educação Física", label: "Educação Física" },
                 { value: "Ciências", label: "Ciências" },
+                { value: "Português", label: "Português" },
                 { value: "Física", label: "Física" },
                 { value: "História", label: "História" },
+                { value: "Geografia", label: "Geografia" },
+                { value: "Química", label: "Química" },
               ]}
             />
             <Input
@@ -129,19 +172,41 @@ function TeacherForm() {
               return (
                 <div key={scheduleItem.week_day} className="schedule-item">
                   <Select
-                    name="subject"
-                    label="Matéria"
-                    onChange={e => setScheduleItems(index, 'week_day', e.target.value)}
+                    name="week_day"
+                    label="Dia da Semana"
+                    value={scheduleItem.week_day}
+                    onChange={(e) =>
+                      setScheduleItemValue(index, "week_day", e.target.value)
+                    }
                     options={[
-                      { value: "Artes", label: "Artes" },
-                      { value: "Matemática", label: "Matemática" },
-                      { value: "Ciências", label: "Ciências" },
-                      { value: "Física", label: "Física" },
-                      { value: "História", label: "História" },
+                      { value: '0', label: 'Domingo' },
+                      { value: '1', label: 'Segunda-feira' },
+                      { value: '2', label: 'Terça-feira' },
+                      { value: '3', label: 'Quarta-feira' },
+                      { value: '4', label: 'Quinta-feira' },
+                      { value: '5', label: 'Sexta-feira' },
+                      { value: '6', label: 'Sábado' },
                     ]}
                   />
-                  <Input name="from" label="Das" type="time" />
-                  <Input name="to" label="Até" type="time" />
+                  <Input
+                    onChange={(e) =>
+                      setScheduleItemValue(index, "from", e.target.value)
+                    }
+                    value={scheduleItem.from}
+                    name="from"
+                    label="Das"
+                    type="time"
+                  />
+                  <Input
+                    onChange={(e) =>
+                      setScheduleItemValue(index, "to", e.target.value)
+                    }
+                    value={scheduleItem.to}
+
+                    name="to"
+                    label="Até"
+                    type="time"
+                  />
                 </div>
               );
             })}
