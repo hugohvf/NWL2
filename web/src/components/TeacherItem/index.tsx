@@ -3,39 +3,54 @@ import React from 'react';
 import whatsAppIcon from '../../assets/images/icons/whatsapp.svg';
 
 import "./styles.css";
+import api from '../../services/api';
 
-function TeacherItem() {
+export interface Teacher {
+  id: number;
+  avatar: string;
+  bio: string;
+  cost: number;
+  name: string;
+  subject: string;
+  whatsapp: string;
+}
+interface TeacherItemProps {
+  teacher: Teacher;
+}
+
+
+const TeacherItem: React.FC<TeacherItemProps> = ({ teacher }) => {
+  function createNewConnection() {
+    api.post('connections', {
+      user_id: teacher.id,
+    })
+  }
     return (
         <article className="teacher-item">
           <header>
             <img
-              src="https://pbs.twimg.com/media/ESn1wVBXYAATqXG.jpg"
-              alt="Chupa cu"
+              src={teacher.avatar}
+              alt={teacher.name}
             />
             <div>
-              <strong>Chupa Cu</strong>
-              <span>Traquinagem</span>
+              <strong>{teacher.name}</strong>
+              <span>{teacher.subject}</span>
             </div>
             </header>
 
             <p>
-              O Brasil já teve sua cota de aparições polêmicas que aterrorizaram
-              a população: o Chupa-Cabra, o ET de Varginha, o governo Temer…
-              <br />
-              <br />É o Chupa-cu, um híbrido entre ser humano, extra-terrestre e
-              ator pornô gay. Ele entra nas casas pelos telhados e ataca vítimas
-              que dormem sem roupa.
+              {teacher.bio}
             </p>
             
             <footer>
                 <p>
                     Preço/hora
-                    <strong>Não tem preço</strong>
+                    <strong>R$ {teacher.cost}</strong>
                 </p>
-                <button type='button'>
+                <a href={`https://wa.me/${teacher.whatsapp}`} onClick={createNewConnection} >
                     <img src={whatsAppIcon} alt="WhatsApp"/>
                     Entrar em contato
-                </button>
+                </a>
             </footer>
         </article>
     );
